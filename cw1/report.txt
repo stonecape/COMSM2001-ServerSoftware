@@ -1,5 +1,4 @@
 The Project Marking Problem
-CHEN HAOYAN (candidate number: 31288)
  
 1. How you solved the problem of synchronizing your threads.
 
