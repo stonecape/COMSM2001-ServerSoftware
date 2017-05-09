@@ -1,0 +1,42 @@
+The Project Marking Problem
+CHEN HAOYAN (candidate number: 31288)
+ 
+1. How you solved the problem of synchronizing your threads.
+
+A mutex and three condition variables are used to solve the problem of synchronization.  And I also used several global variables in order to control the process of project marking, such as markerState[] (which can indicate whether a marker is idle or not),demoState[](the value will be changed when the demo is finished), markerAssessStudentID[](the student that the marker need to estimate) and studentMarkerGrabCount[](record the count of markers the student have grabbed).
+
+There are three condition variables:
+(1)markerReady: 
+	for waiting all the markers have been ready
+	predicate:markerCount != parameters.M
+	comments:The number of markerCount will be added when markers entered the lab, and then students start to grab markers after all the markers were ready.
+	
+(2)condition:
+	for grabbing markers
+	predicate:a. markerState[markerID] == 0 (in marker threads) b. idleMarkerCount < parameters.K (in student threads)
+	comments:
+	a. This condition will be broadcasted after a student finished grabbing markers, and marker threads need to check their markerState[markerID].
+	b. After assessing a project, the 'idleMarkerCount' will be added if the marker is able to estimate next project.
+	
+(3)demoCond: 
+	for informing marker threads of the status of demo
+	predicate:studentMarkerGrabCount[studentID] != parameters.K
+	comments: When a marker is grabbed, the specific student's  studentMarkerGrabCount will be added, and the student will begin to demo after all the markers he/she need are grabbed and are ready to estimate his/her project.
+ 
+2. Why your method is correct (or how it could be made correct).
+
+(1) I checked all the 'lock' methods have the corresponding 'unlock' and avoided putting 'unlock' after 'RETURN' lines.
+
+(2) When the numbers of parameters are extreme (like M=100 and S=100), sometimes a few of markers cannot exit the lab successfully. So I debugged my program to find the cause of errors (write many 'printf' and calculate how many markers or students exited in different situations).
+
+(3) I used a local variable 'err' and proper error handling in my code, which could help us to localize the source of 'magical' problems. 
+
+ 
+3. Why your method is efficient (or how it could be improved).
+
+(1) Obviously, the method would be more efficient if we make the blocks as small as possible, which could release resources rapidly. Actually, some redundant mutexes may be used in my code, and if I rethink them carefully, it would run efficiently.
+
+(2) Using condition variables could avoid busy-waiting. As you can see, busy-waiting is a waste of processor time, and the thread will be awakened when it received a signal or a broadcast after using condition variables.
+
+
+ 
